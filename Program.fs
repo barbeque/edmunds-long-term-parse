@@ -40,6 +40,9 @@ let main argv =
         |> List.filter(fun url -> url.Contains("long-term-road-test"))
         // And only ones about Yugos...
         |> List.filter(fun url -> url.Contains("yugo"))        
+        // Distinct, because even though Instapaper handles that, why send the requests?
+        |> Seq.distinct
+        |> List.ofSeq
     
     // Re-globalize the URL
     let baseUrl = "http://edmunds.com"
