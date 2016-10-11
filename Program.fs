@@ -19,10 +19,7 @@ let addToInstapaper username password (urls : string list) =
             let resp = request |> getResponse |> run
             printfn "Committed %s and got StatusCode=%d" url resp.statusCode
         with
-            | :? System.Net.WebException as ex ->
-                printfn "WebException %s" ex.Message
-                reraise()
-            | _ -> reraise()
+            | ex -> printfn "Exception %s" (ex.GetBaseException()).Message
     ()
 
 [<EntryPoint>]
@@ -48,8 +45,6 @@ let main argv =
     let baseUrl = "http://edmunds.com"
     let fullUrls = List.map(fun x -> baseUrl + x) urls
 
-    let username = "foobar@whatwhat.com"
-    let password = "PASSWORD GOES HERE"
 
     // Write to file
     addToInstapaper username password fullUrls
