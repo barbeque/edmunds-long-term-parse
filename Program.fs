@@ -8,16 +8,18 @@ open System.Threading
 
 let createInstapaperRequest username password url =
     Request.createUrl Post "https://www.instapaper.com/api/add"
-    |> Request.queryStringItem "username" username
-    |> Request.queryStringItem "password" password
     |> Request.queryStringItem "url" url
+    |> Request.basicAuthentication username password
+    |> Request.timeout 3500<ms>
+    |> Request.keepAlive false
 
 let addToInstapaper username password (urls : string list) =
     for url in urls do
+        printfn "Submitting url %s" url
         try
             let request = createInstapaperRequest username password url
-            let resp = request |> getResponse |> run
-            printfn "Committed %s and got StatusCode=%d" url resp.statusCode
+            let resp = request |> Request.responseAsString |> run
+            printfn "Committed %s and got Response=%s" url resp
         with
             | ex -> printfn "Exception %s" (ex.GetBaseException()).Message
     ()
@@ -44,7 +46,9 @@ let main argv =
     // Re-globalize the URL
     let baseUrl = "http://edmunds.com"
     let fullUrls = List.map(fun x -> baseUrl + x) urls
-
+        
+    let username = "foobar"
+    let password = "foobar"
 
     // Write to file
     addToInstapaper username password fullUrls
