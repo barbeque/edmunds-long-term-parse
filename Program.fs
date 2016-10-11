@@ -15,10 +15,11 @@ let createInstapaperRequest username password url =
 
 let sendRequestToInstapaper (request : Request) = job {
     let! response = getResponse request
+    let! message = Response.readBodyAsString response
     do! (timeOutMillis 10) // delay 10ms between hits, don't be a jerk
 
     // Return the status code and the response
-    return (response.statusCode, Response.readBodyAsString response |> run)
+    return (response.statusCode, message)
 }
 
 let addToInstapaper username password (urls : string list) =
