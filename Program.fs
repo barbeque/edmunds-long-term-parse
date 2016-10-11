@@ -6,23 +6,23 @@ open System
 open Hopac
 open System.Threading
 
+let createInstapaperRequest username password url =
+    Request.createUrl Post "https://www.instapaper.com/api/add"
+    |> Request.queryStringItem "username" username
+    |> Request.queryStringItem "password" password
+    |> Request.queryStringItem "url" url
+
 let addToInstapaper username password (urls : string list) =
     for url in urls do
         try
-            let response = 
-                Request.createUrl Post "https://www.instapaper.com/api/add"
-                |> Request.queryStringItem "username" username
-                |> Request.queryStringItem "password" password
-                |> Request.queryStringItem "url" url
-                |> getResponse
-                |> run
-            if (response.statusCode <> 200 && response.statusCode <> 201) then
-                printfn "Something bad happened: %i" response.statusCode
-            else
-                printfn "Committed url %s to instapaper" url
-            Thread.Sleep(2500) // don't beat up Instapaper
+            let request = createInstapaperRequest username password url
+            let resp = request |> getResponse |> run
+            printfn "Committed %s and got StatusCode=%d" url resp.statusCode
         with
-            | ex -> printfn "Exception: %s" (ex.GetBaseException()).Message
+            | :? System.Net.WebException as ex ->
+                printfn "WebException %s" ex.Message
+                reraise()
+            | _ -> reraise()
     ()
 
 [<EntryPoint>]
